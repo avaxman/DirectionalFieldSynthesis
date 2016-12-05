@@ -3,6 +3,7 @@
 #include <igl/edge_topology.h>
 #include "trivial_connection.h"
 #include "dual_cycles.h"
+#include "vector_to_nrosy.h"
 //#include "n_rosy_from_connection.h"
 #include "principal_matching.h"
 #include <igl/euler_characteristic.h>
@@ -69,7 +70,13 @@ void UpdateVectorField()
 
     //overriding current field
     if (viewingMode==IMPLICIT_FIELD){
-        vectorSetField=tutorial_nrosy(V, F, TT, constFaces,  constVecMat, N);
+        constVecMat.conservativeResize(constFaces.rows(),3);
+        for (int i=0;i<constFaces.size();i++)
+            constVecMat.row(i)<<vectorSetField.block(constFaces(i),0,1,3).normalized();
+        
+        MatrixXd singleVecField=tutorial_nrosy(V, F, TT, constFaces,  constVecMat, N);
+        singleVecField.rowwise().normalize();
+        igl::vector_to_nrosy(V, F, singleVecField, N, vectorSetField);
         igl::principal_matching(V, F, EV,  EF, FE, vectorSetField, matching, effort);
         //This only works since the mesh is simply connected!
         VectorXd K;
@@ -99,7 +106,7 @@ void UpdateCurrentView()
                 singColors.row(i)<<1.0-(double)singIndices[i]/(double)N, 1.0-(double)singIndices[i]/(double)N, 1.0;
         }
     }
-    if (viewingMode==TRIVIAL_PRINCIPAL_MATCHING){
+    if ((viewingMode==TRIVIAL_PRINCIPAL_MATCHING)||(viewingMode==IMPLICIT_FIELD)){
         singPoints.resize(V.rows(),3);
         singColors.resize(V.rows(),3);
         for (int i=0;i<V.rows();i++){
@@ -113,7 +120,11 @@ void UpdateCurrentView()
     
     viewer.data.clear();
     viewer.data.set_mesh(V,F);
-    viewer.data.set_colors(Eigen::RowVector3d(1.0,1.0,1.0));
+    MatrixXd faceColors(F.rows(),3);
+    faceColors.rowwise()=Eigen::RowVector3d(1.0,1.0,1.0);
+    for (int i=0;i<constFaces.rows();i++)
+        faceColors.row(constFaces(i))=RowVector3d(1.0,0.3,0.3);
+    viewer.data.set_colors(faceColors);
     viewer.data.add_points(singPoints, singColors);
     
     //draw vector field
@@ -129,7 +140,6 @@ void UpdateCurrentView()
         }
     }
     viewer.data.add_edges(P1,P2,Eigen::RowVector3d(0.0,0.0,1.0));
-    cout<<"P1:"<<P1<<endl;
 }
 
 
@@ -206,7 +216,7 @@ int main()
     for (int i=0;i<constFacesList.size();i++)
         constFaces(i)=constFacesList[i];
     
-    cout<<"constFaces: "<<constFaces<<endl;
+    //cout<<"constFaces: "<<constFaces<<endl;
     
     singVertices.resize(2);
     singIndices.resize(2);
