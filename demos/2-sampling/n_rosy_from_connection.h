@@ -39,7 +39,8 @@ namespace igl
                                            const Eigen::MatrixXi& EF,
                                            const int N,
                                            const Eigen::VectorXd& adjustAngles,
-                                           Eigen::MatrixXd& vectorSetField)
+                                           Eigen::MatrixXd& vectorSetField,
+                                           std::complex<double> globalRot)
     {
         typedef std::complex<double> Complex;
         using namespace Eigen;
@@ -68,13 +69,13 @@ namespace igl
         }
         aP1Full.setFromTriplets(aP1FullTriplets.begin(), aP1FullTriplets.end());
         aP1.setFromTriplets(aP1Triplets.begin(), aP1Triplets.end());
-        VectorXcd torhs=VectorXcd::Zero(F.rows()); torhs(0)=Complex(1.0,0.0);  //global rotation
+        VectorXcd torhs=VectorXcd::Zero(F.rows()); torhs(0)=globalRot;  //global rotation
         VectorXcd rhs=-aP1Full*torhs;
         
         Eigen::SimplicialLDLT<Eigen::SparseMatrix<Complex> > solver;
         solver.compute(aP1.adjoint()*aP1);
         VectorXcd complexPowerField(F.rows());
-        complexPowerField(0)=Complex(1.0,0.0);
+        complexPowerField(0)=globalRot;
         complexPowerField.tail(F.rows()-1)=solver.solve(aP1.adjoint()*rhs);
         VectorXcd complexField=pow(complexPowerField.array(), 1.0/(double)N);
         

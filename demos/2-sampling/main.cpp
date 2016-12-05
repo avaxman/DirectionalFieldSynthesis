@@ -54,7 +54,7 @@ void UpdateVectorField()
     }
     
     igl::trivial_connection(V,F,EV,EF, basisCycleMat, N, indices, adjustAngles);
-    //igl::n_rosy_from_connection(V, F, EV, EF, N, adjustAngles, vectorSetField, globalRot);
+    igl::n_rosy_from_connection(V, F, EV, EF, N, adjustAngles, vectorSetField, globalRot);
     
     if (viewingMode==TRIVIAL_PRINCIPAL_MATCHING){
         igl::principal_matching(V, F, EV,  EF, FE, vectorSetField, matching, effort);
@@ -128,6 +128,7 @@ void UpdateCurrentView()
         }
     }
     viewer.data.add_edges(P1,P2,Eigen::RowVector3d(0.0,0.0,1.0));
+    cout<<"P1:"<<P1<<endl;
 }
 
 
@@ -176,37 +177,25 @@ int main()
 {
     using namespace Eigen;
     using namespace std;
-    igl::readOFF("/Users/amirvaxman/DirectionalFieldSynthesis/demos/data/bumpy.off", V, F);
-//    cout<<"F.rows()"<<F.rows()<<endl;
-    //cout<<"igl::euler_characteristic(V, F): "<<igl::euler_characteristic(V, F)<<endl;
-    /*igl::edge_topology(V, F, EV,FE,EF);
+    igl::readOBJ("../../data/spherers.obj", V, F);
+    igl::edge_topology(V, F, EV,FE,EF);
     igl::barycenter(V,F,BC);
-    igl::per_face_normals(V,F,FN);*/
-    cerr<<"F.rows()"<<F.rows()<<endl;
-    cerr << F << endl;
-    igl::triangle_triangle_adjacency(V, F,TT);
-    cerr<<"F.rows()"<<F.rows()<<endl;
-    cerr << F << endl;
-    exit(0);
-}
+    igl::per_face_normals(V,F,FN);
+    igl::triangle_triangle_adjacency(F,TT);
 
-//    VectorXi primalTreeEdges, dualTreeEdges;
-//    cout<<"F.maxCoeff()"<<F.maxCoeff()<<endl;
-//    cout<<"EV.rows()"<<EV.rows()<<endl;
-//    cout<<"F.rows()"<<F.rows()<<endl;
-//    exit(0);
-//    igl::dual_cycles(F, EV, EF, basisCycleMat,  primalTreeEdges, dualTreeEdges);
-//    
-//    //taking midway faces as constraints for the implicit field interpolation
-//    
-//    singVertices.resize(2);
-//    singIndices.resize(2);
-//    singVertices[0]=35;
-//    singVertices[1]=36;
-//    singIndices[0]=N;
-//    singIndices[1]=N;
-//    UpdateVectorField();
-//    UpdateCurrentView();
-//    viewer.callback_key_down = &key_down;
-//    viewer.launch();
-//}
+    VectorXi primalTreeEdges, dualTreeEdges;
+    igl::dual_cycles(F, EV, EF, basisCycleMat,  primalTreeEdges, dualTreeEdges);
+    
+    //taking midway faces as constraints for the implicit field interpolation
+    
+    singVertices.resize(2);
+    singIndices.resize(2);
+    singVertices[0]=35;
+    singVertices[1]=36;
+    singIndices[0]=N;
+    singIndices[1]=N;
+    UpdateVectorField();
+    UpdateCurrentView();
+    viewer.callback_key_down = &key_down;
+    viewer.launch();
+}
