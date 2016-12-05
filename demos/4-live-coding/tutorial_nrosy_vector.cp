@@ -1,3 +1,8 @@
+// Copyright (C) 2016 Daniele Panozzo <daniele.panozzo@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public License
+// v. 2.0. If a copy of the MPL was not distributed with this file, You can
+// obtain one at http://mozilla.org/MPL/2.0/.
 #include "tutorial_nrosy.h"
 #include <Eigen/Geometry>
 #include <Eigen/Sparse>
@@ -77,7 +82,7 @@ MatrixXd tutorial_nrosy
   A.setFromTriplets(t.begin(), t.end());
   SparseMatrixXcd b(count,1);
   b.setFromTriplets(tb.begin(), tb.end());
-  SparseLU< SparseMatrixXcd > solver;
+  SimplicialLDLT< SparseMatrixXcd > solver;
   solver.compute(A.adjoint()*A);
   assert(solver.info()==Success);
   MatrixXcd u = solver.solve(A.adjoint()*MatrixXcd(b));
