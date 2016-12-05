@@ -1,0 +1,47 @@
+language: cpp
+sudo: false
+matrix:
+  include:
+    - os: linux
+      compiler: gcc-4.8.1
+      script:
+        - git submodule update --init --recursive
+        - mkdir libigl/external/nanogui/ext/glfw/include/GL
+        - wget --no-check-certificate -P libigl/external/nanogui/ext/glfw/include/GL https://www.opengl.org/registry/api/GL/glcorearb.h
+        - mkdir build
+        - cd build
+        - cmake -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8 ../
+        - make -j 2
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - george-edison55-precise-backports
+          packages:
+            - xorg-dev
+            - libglu1-mesa-dev
+            - g++-4.8
+            - cmake
+            - cmake-data
+    - os: osx
+      compiler: clang
+      script:
+        - git submodule update --init --recursive
+        - cd demos/2-sampling
+        - mkdir build
+        - cd build
+        - cmake ../
+        - make -j 2
+        - cd ../../
+        - cd demos/3-visualization
+        - mkdir build
+        - cd build
+        - cmake ../
+        - make -j 2
+        - cd ../../
+        - cd demos/4-live-coding
+        - mkdir build
+        - cd build
+        - cmake ../
+        - make -j 2
+        - cd ../../
