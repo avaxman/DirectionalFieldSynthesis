@@ -13,19 +13,19 @@ matrix:
         - cd build
         - cmake -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8 ../
         - make -j 2
-        - cd ../../
+        - cd ../../../
         - cd demos/3-visualization
         - mkdir build
         - cd build
         - cmake -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8 ../
         - make -j 2
-        - cd ../../
+        - cd ../../../
         - cd demos/4-live-coding
         - mkdir build
         - cd build
         - cmake -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8 ../
         - make -j 2
-        - cd ../../
+        - cd ../../../
       addons:
         apt:
           sources:
@@ -46,16 +46,16 @@ matrix:
         - cd build
         - cmake ../
         - make -j 2
-        - cd ../../
+        - cd ../../../
         - cd demos/3-visualization
         - mkdir build
         - cd build
         - cmake ../
         - make -j 2
-        - cd ../../
+        - cd ../../../
         - cd demos/4-live-coding
         - mkdir build
         - cd build
         - cmake ../
         - make -j 2
-        - cd ../../
+        - cd ../../../
