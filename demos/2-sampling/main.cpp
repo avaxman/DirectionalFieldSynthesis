@@ -3,7 +3,7 @@
 #include <igl/edge_topology.h>
 #include "trivial_connection.h"
 #include "dual_cycles.h"
-#include "n_rosy_from_connection.h"
+//#include "n_rosy_from_connection.h"
 #include "principal_matching.h"
 #include <igl/euler_characteristic.h>
 #include <igl/gaussian_curvature.h>
@@ -54,7 +54,7 @@ void UpdateVectorField()
     }
     
     igl::trivial_connection(V,F,EV,EF, basisCycleMat, N, indices, adjustAngles);
-    igl::n_rosy_from_connection(V, F, EV, EF, N, adjustAngles, vectorSetField, globalRot);
+    //igl::n_rosy_from_connection(V, F, EV, EF, N, adjustAngles, vectorSetField, globalRot);
     
     if (viewingMode==TRIVIAL_PRINCIPAL_MATCHING){
         igl::principal_matching(V, F, EV,  EF, FE, vectorSetField, matching, effort);
@@ -67,7 +67,7 @@ void UpdateVectorField()
     }
 
     //overriding current field
-    if (viewingMode==IMPLICIT_FIELD){
+    /*if (viewingMode==IMPLICIT_FIELD){
         vectorSetField=tutorial_nrosy(V, F, TT, constFaces,  constVecMat, N);
         igl::principal_matching(V, F, EV,  EF, FE, vectorSetField, matching, effort);
         //This only works since the mesh is simply connected!
@@ -75,7 +75,7 @@ void UpdateVectorField()
         igl::gaussian_curvature(V,F,K);
         VectorXd effortSum=basisCycleMat*effort+N*K;
         prinSingIndices=(effortSum.array()/(2*M_PI)).cast<int>();
-    }
+    }*/
 }
 
 
@@ -172,11 +172,12 @@ bool key_down(igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
 
 
 
-int main(int argc, char *argv[])
+int main()
 {
     using namespace Eigen;
     using namespace std;
-    igl::readOBJ("../../data/spherers.obj", V, F);
+    igl::readOFF("/Users/amirvaxman/DirectionalFieldSynthesis/demos/data/bumpy.off", V, F);
+    cout<<"F:"<<F<<endl;
     igl::edge_topology(V, F, EV,FE,EF);
     igl::barycenter(V,F,BC);
     igl::per_face_normals(V,F,FN);
