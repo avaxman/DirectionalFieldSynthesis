@@ -22,6 +22,7 @@ Eigen::MatrixXd vectorSetField;
 Eigen::VectorXd effort;
 Eigen::MatrixXi TT;
 Eigen::VectorXi constFaces;
+Eigen::MatrixXd constVecMat;
 int N=2;
 double vfScale=0.01;
 
@@ -67,7 +68,7 @@ void UpdateVectorField()
     }
 
     //overriding current field
-    /*if (viewingMode==IMPLICIT_FIELD){
+    if (viewingMode==IMPLICIT_FIELD){
         vectorSetField=tutorial_nrosy(V, F, TT, constFaces,  constVecMat, N);
         igl::principal_matching(V, F, EV,  EF, FE, vectorSetField, matching, effort);
         //This only works since the mesh is simply connected!
@@ -75,7 +76,7 @@ void UpdateVectorField()
         igl::gaussian_curvature(V,F,K);
         VectorXd effortSum=basisCycleMat*effort+N*K;
         prinSingIndices=(effortSum.array()/(2*M_PI)).cast<int>();
-    }*/
+    }
 }
 
 
@@ -171,6 +172,12 @@ bool key_down(igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
     return true;
 }
 
+double sign(double x){
+    if (x>0) return 1.0;
+    if (x<0) return -1.0;
+    return 0.0;
+}
+
 
 
 int main()
@@ -187,6 +194,19 @@ int main()
     igl::dual_cycles(F, EV, EF, basisCycleMat,  primalTreeEdges, dualTreeEdges);
     
     //taking midway faces as constraints for the implicit field interpolation
+    vector<int> constFacesList;
+    for (int i=0;i<F.rows();i++){
+        for (int j=0;j<3;j++)
+            if (sign(V.row(F(i,j))(2))!=sign(V.row(F(i,(j+1)%3))(2))){
+                constFacesList.push_back(i);
+                break;
+            }
+    }
+    constFaces.resize(constFacesList.size());
+    for (int i=0;i<constFacesList.size();i++)
+        constFaces(i)=constFacesList[i];
+    
+    cout<<"constFaces: "<<constFaces<<endl;
     
     singVertices.resize(2);
     singIndices.resize(2);
