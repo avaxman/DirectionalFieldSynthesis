@@ -177,25 +177,36 @@ int main()
     using namespace Eigen;
     using namespace std;
     igl::readOFF("/Users/amirvaxman/DirectionalFieldSynthesis/demos/data/bumpy.off", V, F);
-    cout<<"F:"<<F<<endl;
-    igl::edge_topology(V, F, EV,FE,EF);
+//    cout<<"F.rows()"<<F.rows()<<endl;
+    //cout<<"igl::euler_characteristic(V, F): "<<igl::euler_characteristic(V, F)<<endl;
+    /*igl::edge_topology(V, F, EV,FE,EF);
     igl::barycenter(V,F,BC);
-    igl::per_face_normals(V,F,FN);
+    igl::per_face_normals(V,F,FN);*/
+    cerr<<"F.rows()"<<F.rows()<<endl;
+    cerr << F << endl;
     igl::triangle_triangle_adjacency(V, F,TT);
-
-    VectorXi primalTreeEdges, dualTreeEdges;
-    igl::dual_cycles(F, EV, EF, basisCycleMat,  primalTreeEdges, dualTreeEdges);
-    
-    //taking midway faces as constraints for the implicit field interpolation
-    
-    singVertices.resize(2);
-    singIndices.resize(2);
-    singVertices[0]=35;
-    singVertices[1]=36;
-    singIndices[0]=N;
-    singIndices[1]=N;
-    UpdateVectorField();
-    UpdateCurrentView();
-    viewer.callback_key_down = &key_down;
-    viewer.launch();
+    cerr<<"F.rows()"<<F.rows()<<endl;
+    cerr << F << endl;
+    exit(0);
 }
+
+//    VectorXi primalTreeEdges, dualTreeEdges;
+//    cout<<"F.maxCoeff()"<<F.maxCoeff()<<endl;
+//    cout<<"EV.rows()"<<EV.rows()<<endl;
+//    cout<<"F.rows()"<<F.rows()<<endl;
+//    exit(0);
+//    igl::dual_cycles(F, EV, EF, basisCycleMat,  primalTreeEdges, dualTreeEdges);
+//    
+//    //taking midway faces as constraints for the implicit field interpolation
+//    
+//    singVertices.resize(2);
+//    singIndices.resize(2);
+//    singVertices[0]=35;
+//    singVertices[1]=36;
+//    singIndices[0]=N;
+//    singIndices[1]=N;
+//    UpdateVectorField();
+//    UpdateCurrentView();
+//    viewer.callback_key_down = &key_down;
+//    viewer.launch();
+//}
