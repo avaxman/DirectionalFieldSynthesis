@@ -1,3 +1,6 @@
 [submodule "demos/external/libigl"]
 	path = demos/external/libigl
 	url = https://github.com/libigl/libigl
+[submodule "demos/1-instant-meshes"]
+	path = demos/1-instant-meshes
+	url = https://github.com/wjakob/instant-meshes
