@@ -1,0 +1,3 @@
+[submodule "demos/external/libigl"]
+	path = demos/external/libigl
+	url = https://github.com/libigl/libigl
