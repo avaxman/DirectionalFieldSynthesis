@@ -35,10 +35,13 @@ The course will follow the following schedule, spanning 3:45 hours with a break 
 3. Taxonomy - Amir Vaxman.
 4. Discretization - Amir Vaxman (including sampling demo).
 5. Representation - Marcel Campen.
+
 **Break**
+
 6. Objectives and Constraints - Daniele Panozzo.
 7. Visualization - Amir Vaxman (including visualization demo).
 8. Live coding demo - Daniele Panozzo.
 9. Open Problems - Amir Vaxman.
+
 **Q&A**
 
