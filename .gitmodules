@@ -1,7 +1,0 @@
-[submodule "demos/1-instant-meshes"]
-	path = demos/1-instant-meshes
-	url = https://github.com/wjakob/instant-meshes
-[submodule "libdirectional"]
-	path = demos/external/libdirectional
-	url = https://github.com/avaxman/libdirectional.git
-
