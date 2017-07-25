@@ -4,3 +4,4 @@
 [submodule "libdirectional"]
 	path = demos/external/libdirectional
 	url = https://github.com/avaxman/libdirectional.git
+
