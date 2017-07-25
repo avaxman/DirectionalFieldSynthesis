@@ -27,6 +27,7 @@ make
 ```
 
 The demos are using the [libdirectional](https://github.com/avaxman/libdirectional) library that is automatically submoduled to this course (be sure to clone this repository recursively as explained above).
+ 
 ##Course Schedule
 
 The course will follow the following schedule, spanning 3:15 hours with a break in the middle:
