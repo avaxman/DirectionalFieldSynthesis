@@ -31,10 +31,10 @@ option(LIBIGL_USE_STATIC_LIBRARY "Use LibIGL as static library" OFF)
 # add a customizable menu bar
 option(LIBIGL_WITH_NANOGUI     "Use Nanogui menu"   OFF)
 
-# libigl options: choose your dependencies (by default everything is OFF except opengl)
+# libigl options: choose your dependencies (by default everything is OFF except opengl) 
 option(LIBIGL_WITH_VIEWER      "Use OpenGL viewer"  ON)
 option(LIBIGL_WITH_OPENGL      "Use OpenGL"         ON)
-option(LIBIGL_WITH_GLFW        "Use GLFW"           ON)
+option(LIBIGL_WITH_OPENGL_GLFW "Use GLFW"           ON)
 option(LIBIGL_WITH_BBW         "Use BBW"            OFF)
 option(LIBIGL_WITH_EMBREE      "Use Embree"         OFF)
 option(LIBIGL_WITH_PNG         "Use PNG"            OFF)
@@ -51,7 +51,6 @@ if(LIBIGL_WITH_CGAL) # Do not remove or move this block, the cgal build system f
   set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS TRUE CACHE BOOL "CGAL's CMAKE Setup is super annoying ")
   include(${CGAL_USE_FILE})
 endif()
-
 # Adding libigl: choose the path to your local copy libigl
 # This is going to compile everything you requested
 #message(FATAL_ERROR "${PROJECT_SOURCE_DIR}/../libigl/cmake")
