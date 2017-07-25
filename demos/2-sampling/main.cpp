@@ -1,7 +1,6 @@
 #include <igl/viewer/Viewer.h>
 #include <igl/readOFF.h>
 #include <igl/edge_topology.h>
-#include "trivial_connection.h"
 #include <directional/dual_cycles.h>
 #include <directional/representative_to_raw.h>
 #include <directional/principal_matching.h>
@@ -9,9 +8,10 @@
 #include <directional/trivial_connection.h>
 #include <igl/triangle_triangle_adjacency.h>
 #include <igl/euler_characteristic.h>
-#include "tutorial_nrosy.h"
 #include <directional/rotation_to_representative.h>
 #include <directional/representative_to_raw.h>
+#include <directional/complex_to_representative.h>
+#include <directional/complex_field.h>
 
 std::vector<int> singVertices;
 std::vector<int> singIndices;
@@ -23,7 +23,6 @@ Eigen::SparseMatrix<double, Eigen::RowMajor> basisCycleMat;
 Eigen::VectorXi indices, matching;
 Eigen::MatrixXd directionalField;
 Eigen::VectorXd effort;
-Eigen::MatrixXi TT;
 Eigen::VectorXi constFaces;
 Eigen::MatrixXd constVecMat;
 int N=2;
@@ -81,9 +80,11 @@ void UpdateDirectionalField()
             constVecMat.row(i)<<directionalField.block(constFaces(i),0,1,3).normalized();
         
         Eigen::VectorXd effort;
-        MatrixXd singleVecField=tutorial_nrosy(V, F, TT, constFaces,  constVecMat, N);
-        singleVecField.rowwise().normalize();
-        directional::representative_to_raw(V,F,singleVecField,N, directionalField);
+        Eigen::MatrixXcd complexField;
+        directional::complex_field(V, F, constFaces, constVecMat, N, complexField);
+        directional::complex_to_representative(V,F, complexField,N,representative);
+        representative.rowwise().normalize();
+        directional::representative_to_raw(V,F,representative,N, directionalField);
         directional::principal_matching(V, F,directionalField,N, effort);
         directional::get_indices(V,F,basisCycleMat,effort,N,prinSingIndices);
     }
@@ -201,8 +202,7 @@ int main()
     igl::edge_topology(V, F, EV,FE,EF);
     igl::barycenter(V,F,BC);
     igl::per_face_normals(V,F,FN);
-    igl::triangle_triangle_adjacency(F,TT);
-
+    
     VectorXi primalTreeEdges, dualTreeEdges;
     directional::dual_cycles(F,EV, EF, basisCycleMat);
   
