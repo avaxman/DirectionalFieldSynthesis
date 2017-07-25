@@ -4,15 +4,20 @@ project(2-sampling)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(LIBIGL QUIET)
+find_package(LIBDIRECTIONAL QUIET)
 
 if (NOT LIBIGL_FOUND)
    message(FATAL_ERROR "libigl not found --- You can download it using: \n git clone --recursive https://github.com/libigl/libigl.git ${PROJECT_SOURCE_DIR}/../libigl")
 endif()
 
+if (NOT LIBDIRECTIONAL_FOUND)
+   message(FATAL_ERROR "libdirectional not found --- You can download it using: \n git clone --recursive https://github.com/avaxman/libdirectional.git ${PROJECT_SOURCE_DIR}/../libdirectional")
+endif()
+
 # Compilation flags: adapt to your needs
 if(MSVC)
   # Enable parallel compilation
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /bigobj")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /bigobj /D_SCL_SECURE_NO_DEPRECATE")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR} )
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR} )
 else()
@@ -51,7 +56,6 @@ if(LIBIGL_WITH_CGAL) # Do not remove or move this block, the cgal build system f
   set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS TRUE CACHE BOOL "CGAL's CMAKE Setup is super annoying ")
   include(${CGAL_USE_FILE})
 endif()
-
 # Adding libigl: choose the path to your local copy libigl
 # This is going to compile everything you requested
 #message(FATAL_ERROR "${PROJECT_SOURCE_DIR}/../libigl/cmake")
@@ -67,6 +71,8 @@ message("libigl definitions: ${LIBIGL_DEFINITIONS}")
 # Prepare the build environment
 include_directories(${LIBIGL_INCLUDE_DIRS})
 add_definitions(${LIBIGL_DEFINITIONS})
+
+include_directories(${LIBDIRECTIONAL_INCLUDE_DIRS})
 
 # Add your project files
 FILE(GLOB SRCFILES *.cpp)

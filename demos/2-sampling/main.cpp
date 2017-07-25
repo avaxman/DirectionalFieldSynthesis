@@ -2,14 +2,16 @@
 #include <igl/readOFF.h>
 #include <igl/edge_topology.h>
 #include "trivial_connection.h"
-#include "dual_cycles.h"
-#include "vector_to_nrosy.h"
-//#include "n_rosy_from_connection.h"
-#include "principal_matching.h"
-#include <igl/euler_characteristic.h>
-#include <igl/gaussian_curvature.h>
-#include "tutorial_nrosy.h"
+#include <directional/dual_cycles.h>
+#include <directional/representative_to_raw.h>
+#include <directional/principal_matching.h>
+#include <directional/get_indices.h>
+#include <directional/trivial_connection.h>
 #include <igl/triangle_triangle_adjacency.h>
+#include <igl/euler_characteristic.h>
+#include "tutorial_nrosy.h"
+#include <directional/rotation_to_representative.h>
+#include <directional/representative_to_raw.h>
 
 std::vector<int> singVertices;
 std::vector<int> singIndices;
@@ -19,7 +21,7 @@ Eigen::MatrixXi F, EV, FE, EF;
 Eigen::MatrixXd V, BC, FN;
 Eigen::SparseMatrix<double, Eigen::RowMajor> basisCycleMat;
 Eigen::VectorXi indices, matching;
-Eigen::MatrixXd vectorSetField;
+Eigen::MatrixXd directionalField;
 Eigen::VectorXd effort;
 Eigen::MatrixXi TT;
 Eigen::VectorXi constFaces;
@@ -30,7 +32,7 @@ double vfScale=0.01;
 
 
 bool showSmoothness=false;
-std::complex<double> globalRot=std::complex<double>(1.0,0.0);
+double globalRotation=0.0;
 
 typedef enum {TRIVIAL_ONE_SING, TRIVIAL_PRINCIPAL_MATCHING, IMPLICIT_FIELD} ViewingModes;
 ViewingModes viewingMode=TRIVIAL_ONE_SING;
@@ -38,33 +40,37 @@ ViewingModes viewingMode=TRIVIAL_ONE_SING;
 igl::viewer::Viewer viewer;
 
 
-void UpdateVectorField()
+void UpdateDirectionalField()
 {
     
     using namespace Eigen;
     using namespace std;
     typedef complex<double> Complex;
-    VectorXd adjustAngles;
+    VectorXd rotationAngles;
     VectorXi indices=VectorXi::Zero(basisCycleMat.rows());
     for (int i=0;i<singVertices.size();i++)
         indices(singVertices[i])=singIndices[i];
     
     if (indices.sum()!=N*igl::euler_characteristic(V, F)){
-        std::cout<<"Warning! the singularities are not compatible with topology."<<std::endl;
+        std::cout<<"Warning! the prescribed singularities are not compatible with topology."<<std::endl;
         std::cout<<"chi = "<<igl::euler_characteristic(V, F)<<", indices.sum()="<<indices.sum()<<std::endl;
         return;
     }
     
-    igl::trivial_connection(V,F,EV,EF, basisCycleMat, N, indices, adjustAngles);
-    igl::n_rosy_from_connection(V, F, EV, EF, N, adjustAngles, vectorSetField, globalRot);
+    double TCError;
+    directional::trivial_connection(V,F,basisCycleMat,indices,N,rotationAngles, TCError);
+    cout<<"Trivial connection error: "<<TCError<<std::endl;
+    
+    Eigen::MatrixXd representative;
+    
+    directional::rotation_to_representative(V, F,EV,EF,rotationAngles,N,globalRotation, representative);
+    directional::representative_to_raw(V,F,representative,N, directionalField);
+    
     
     if (viewingMode==TRIVIAL_PRINCIPAL_MATCHING){
-        igl::principal_matching(V, F, EV,  EF, FE, vectorSetField, matching, effort);
-        //This only works since the mesh is simply connected!
-        VectorXd K;
-        igl::gaussian_curvature(V,F,K);
-        VectorXd effortSum=basisCycleMat*effort+N*K;
-        prinSingIndices=(effortSum.array()/(2*M_PI)).cast<int>();
+        Eigen::VectorXd effort;
+        directional::principal_matching(V, F,directionalField,N, effort);
+        directional::get_indices(V,F,basisCycleMat,effort,N,prinSingIndices);
         std::cout<<"prinSingIndices sum: "<<prinSingIndices.sum()<<std::endl;
     }
 
@@ -72,17 +78,14 @@ void UpdateVectorField()
     if (viewingMode==IMPLICIT_FIELD){
         constVecMat.conservativeResize(constFaces.rows(),3);
         for (int i=0;i<constFaces.size();i++)
-            constVecMat.row(i)<<vectorSetField.block(constFaces(i),0,1,3).normalized();
+            constVecMat.row(i)<<directionalField.block(constFaces(i),0,1,3).normalized();
         
+        Eigen::VectorXd effort;
         MatrixXd singleVecField=tutorial_nrosy(V, F, TT, constFaces,  constVecMat, N);
         singleVecField.rowwise().normalize();
-        igl::vector_to_nrosy(V, F, singleVecField, N, vectorSetField);
-        igl::principal_matching(V, F, EV,  EF, FE, vectorSetField, matching, effort);
-        //This only works since the mesh is simply connected!
-        VectorXd K;
-        igl::gaussian_curvature(V,F,K);
-        VectorXd effortSum=basisCycleMat*effort+N*K;
-        prinSingIndices=(effortSum.array()/(2*M_PI)).cast<int>();
+        directional::representative_to_raw(V,F,singleVecField,N, directionalField);
+        directional::principal_matching(V, F,directionalField,N, effort);
+        directional::get_indices(V,F,basisCycleMat,effort,N,prinSingIndices);
     }
 }
 
@@ -128,12 +131,12 @@ void UpdateCurrentView()
     viewer.data.add_points(singPoints, singColors);
     
     //draw vector field
-    MatrixXd P1(vectorSetField.rows()*N,3);
-    MatrixXd P2(vectorSetField.rows()*N,3);
-    for (int i=0;i<vectorSetField.rows();i++){
+    MatrixXd P1(directionalField.rows()*N,3);
+    MatrixXd P2(directionalField.rows()*N,3);
+    for (int i=0;i<directionalField.rows();i++){
         //std::cout<<"Face "<<i<<std::endl;
         for (int j=0;j<N;j++){
-            RowVector3d currVector=vectorSetField.block(i,3*j,1,3);
+            RowVector3d currVector=directionalField.block(i,3*j,1,3);
             //std::cout<<"currVector"<<currVector<<std::endl;
             P1.row(N*i+j)=BC.row(i)+0.005*FN.row(i);
             P2.row(N*i+j)=BC.row(i)+0.005*FN.row(i)+currVector*vfScale;
@@ -169,15 +172,15 @@ bool key_down(igl::viewer::Viewer& viewer, unsigned char key, int modifiers)
         }
             
         case 'D':{
-            globalRot*=std::complex<double>(exp(std::complex<double>(0.0,0.1)));
-            std::cout<<"globalRot" <<globalRot<<std::endl;
+            globalRotation+=igl::PI/32;
+            std::cout<<"globalRotation" <<globalRotation<<std::endl;
             break;
         }
             
         default: break;  //dunno why this is needed but it helps...
             
     }
-    UpdateVectorField();
+    UpdateDirectionalField();
     UpdateCurrentView();
     return true;
 }
@@ -201,8 +204,8 @@ int main()
     igl::triangle_triangle_adjacency(F,TT);
 
     VectorXi primalTreeEdges, dualTreeEdges;
-    igl::dual_cycles(F, EV, EF, basisCycleMat,  primalTreeEdges, dualTreeEdges);
-    
+    directional::dual_cycles(F,EV, EF, basisCycleMat);
+  
     //taking midway faces as constraints for the implicit field interpolation
     vector<int> constFacesList;
     for (int i=0;i<F.rows();i++){
@@ -224,7 +227,7 @@ int main()
     singVertices[1]=36;
     singIndices[0]=N;
     singIndices[1]=N;
-    UpdateVectorField();
+    UpdateDirectionalField();
     UpdateCurrentView();
     viewer.callback_key_down = &key_down;
     viewer.launch();
