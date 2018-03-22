@@ -8,7 +8,7 @@
 #include <igl/local_basis.h>
 #include <igl/readOFF.h>
 #include <igl/readOBJ.h>
-#include <igl/viewer/Viewer.h>
+#include <igl/opengl/glfw/Viewer.h>
 #include <igl/triangle_triangle_adjacency.h>
 #include <igl/unproject_onto_mesh.h>
 
@@ -71,7 +71,7 @@ void representative_to_nrosy(
 // Plots the mesh with an N-RoSy field
 // The constrained faces (b) are colored in red.
 void plot_mesh_nrosy(
-  igl::viewer::Viewer& viewer,
+  igl::opengl::glfw::Viewer& viewer,
   Eigen::MatrixXd& V,
   Eigen::MatrixXi& F,
   int N,
@@ -81,8 +81,8 @@ void plot_mesh_nrosy(
   using namespace Eigen;
   using namespace std;
   // Clear the mesh
-  viewer.data.clear();
-  viewer.data.set_mesh(V,F);
+  viewer.data().clear();
+  viewer.data().set_mesh(V,F);
 
   // Expand the representative vectors in the full vector set and plot them as lines
   double avg = igl::avg_edge_length(V, F);
@@ -97,17 +97,17 @@ void plot_mesh_nrosy(
     for(unsigned j=0; j<N; ++j)
       Be.row(i*N+j) = B.row(i);
 
-  viewer.data.add_edges(Be,Be+Y*(avg/2),RowVector3d(0,0,1));
+  viewer.data().add_edges(Be,Be+Y*(avg/2),RowVector3d(0,0,1));
 
   // Highlight in red the constrained faces
   MatrixXd C = MatrixXd::Constant(F.rows(),3,1);
   for (unsigned i=0; i<b.size();++i)
     C.row(b(i)) << 1, 0, 0;
-  viewer.data.set_colors(C);
+  viewer.data().set_colors(C);
 }
 
 // It allows to change the degree of the field when a number is pressed
-bool key_down(igl::viewer::Viewer& viewer, unsigned char key, int modifier)
+bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier)
 {
   using namespace Eigen;
   using namespace std;
@@ -169,7 +169,7 @@ bool key_down(igl::viewer::Viewer& viewer, unsigned char key, int modifier)
   return false;
 }
 
-bool mouse_down(igl::viewer::Viewer& viewer, int, int)
+bool mouse_down(igl::opengl::glfw::Viewer& viewer, int, int)
 {
   int fid_ray;
   Eigen::Vector3f bary;
@@ -229,20 +229,20 @@ int main(int argc, char *argv[])
 
   selected = 0;
 
-  igl::viewer::Viewer viewer;
+  igl::opengl::glfw::Viewer viewer;
 
   // Interpolate the field and plot
   key_down(viewer, '1', 0);
 
   // Plot the mesh
-  viewer.data.set_mesh(V, F);
+  viewer.data().set_mesh(V, F);
 
   // Register the callbacks
   viewer.callback_key_down = &key_down;
   viewer.callback_mouse_down = &mouse_down;
 
   // Disable wireframe
-  viewer.core.show_lines = false;
+  viewer.data().show_lines = false;
 
   // Launch the viewer
   viewer.launch();
