@@ -7,6 +7,8 @@ This repository contains the material for the [SIGGRAPH 2017 course](http://s201
 
 The first edition of this course appeared as a [State-of-the-art report](https://diglib.eg.org/handle/10.1111/cgf12864) in Eurographics 2016, and the previous edition as a [SIGGRAPH Asia 2016 course](http://dl.acm.org/citation.cfm?id=2988458&picked=prox). A shorter version was given at the [SGP 2017 graduate school](http://geometry.cs.ucl.ac.uk/SGP2017/?p=gradschool) (folder `SGPSummerSchool`)
 
+This course was given at the SGP 2021 summer school, with the new version in the SGP2021SuumerSchool folder. The demos are given from [Directional](https://github.com/avaxman/Directional), and are 201, 302, 303 and 401 from the tutorial.
+
 The course notes and slides can be found in the respective folders.
 
 ##Installation
